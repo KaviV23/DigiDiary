@@ -20,15 +20,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.sunway.csc2074.digidiary.data.DiaryEntry
+import com.sunway.csc2074.digidiary.data.DiaryEntryViewModel
 import com.sunway.csc2074.digidiary.screen.SetupNavGraph
 import com.sunway.csc2074.digidiary.ui.theme.DigiDiaryTheme
 
 class MainActivity : ComponentActivity() {
 
-    lateinit var navController: NavHostController
+    private lateinit var navController: NavHostController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +45,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 navController = rememberNavController()
-                SetupNavGraph(navController = navController, diaryRepository)
+                SetupNavGraph(navController = navController, diaryEntries = diaryRepository, context = this)
 
 
             }
