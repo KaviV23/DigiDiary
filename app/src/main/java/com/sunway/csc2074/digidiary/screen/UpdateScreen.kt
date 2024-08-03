@@ -81,7 +81,7 @@ fun UpdateScreen(entryId: Int, context: ComponentActivity, navController: NavCon
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back to home screen")
                     }
                 },
-                title = { Text(text = "Add Diary Entry") },
+                title = { Text(text = "Update Diary Entry") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary
