@@ -20,7 +20,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
-import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -55,14 +53,16 @@ fun AddScreen(context: ComponentActivity, navController: NavController) {
     var dateBtnText by remember { mutableStateOf("Select Date") }
     var timeBtnText by remember { mutableStateOf("Select Time") }
 
-    val mDiaryEntryViewModel: DiaryEntryViewModel = ViewModelProvider(context)[DiaryEntryViewModel::class.java]
+    val diaryEntryViewModel: DiaryEntryViewModel = ViewModelProvider(context)[DiaryEntryViewModel::class.java]
 
     Scaffold (
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back to homescreen")
+                    IconButton(onClick = {
+                        navController.navigateUp()
+                    }) {
+                        Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back to home screen")
                     }
                 },
                 title = { Text(text = "Add Diary Entry") },
@@ -75,7 +75,7 @@ fun AddScreen(context: ComponentActivity, navController: NavController) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    insertDataIntoDatabase(navController, mDiaryEntryViewModel, titleInputText, descInputText, selDate, selTime)
+                    insertDataIntoDatabase(navController, diaryEntryViewModel, titleInputText, descInputText, selDate, selTime)
                 }
             ) {
                 Icon(Icons.Default.Done, contentDescription = "Save")

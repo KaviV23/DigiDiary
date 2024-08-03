@@ -51,6 +51,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.runtime.livedata)
     // versions
     val room_version = "2.6.1"
     val material3_dialogs = "1.3.0"

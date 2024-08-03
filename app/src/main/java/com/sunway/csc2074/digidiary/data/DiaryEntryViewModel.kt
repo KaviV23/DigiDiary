@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 
 class DiaryEntryViewModel(application: Application): AndroidViewModel(application) {
 
-    private val readAllData: LiveData<List<DiaryEntry>>
+    val readAllData: LiveData<List<DiaryEntry>>
     private val repository: DiaryEntryRepository
 
     init {

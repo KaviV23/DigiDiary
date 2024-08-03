@@ -14,9 +14,8 @@ import com.sunway.csc2074.digidiary.data.DiaryEntryViewModel
 
 @Composable
 fun SetupNavGraph(
+    context: ComponentActivity,
     navController: NavHostController,
-    diaryEntries: MutableList<DiaryEntry>,
-    context: ComponentActivity
 ) {
     NavHost(
         navController = navController,
@@ -25,7 +24,7 @@ fun SetupNavGraph(
         composable(
             route = Screen.HomeScreen.route
         ) {
-            HomeScreen(navController, diaryEntries)
+            HomeScreen(context, navController)
         }
         composable(
             route = Screen.AddScreen.route

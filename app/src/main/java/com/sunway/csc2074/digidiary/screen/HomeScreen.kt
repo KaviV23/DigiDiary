@@ -1,8 +1,8 @@
 package com.sunway.csc2074.digidiary.screen
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -21,24 +20,27 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.sunway.csc2074.digidiary.R
 import com.sunway.csc2074.digidiary.data.DiaryEntry
+import com.sunway.csc2074.digidiary.data.DiaryEntryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController, diaryEntries: MutableList<DiaryEntry>) {
+fun HomeScreen(context: ComponentActivity, navController: NavController) {
+
+    val diaryEntryViewModel: DiaryEntryViewModel = ViewModelProvider(context)[DiaryEntryViewModel::class.java]
+    val diaryEntries by diaryEntryViewModel.readAllData.observeAsState(emptyList())
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -105,11 +107,11 @@ fun ListDiaryEntry(entry: DiaryEntry) {
     }
 }
 
-@Composable
-@Preview(showBackground = true)
-fun HomeScreenPreview() {
-    HomeScreen(navController = rememberNavController(), diaryEntries = mutableListOf(
-        DiaryEntry(0,"poo","poo", "TIME"),
-        DiaryEntry(0,"poo","poo", "TIME")
-    ))
-}
+//@Composable
+//@Preview(showBackground = true)
+//fun HomeScreenPreview() {
+//    HomeScreen(navController = rememberNavController(), diaryEntries = mutableListOf(
+//        DiaryEntry(0,"poo","poo", "TIME"),
+//        DiaryEntry(0,"poo","poo", "TIME")
+//    ))
+//}
