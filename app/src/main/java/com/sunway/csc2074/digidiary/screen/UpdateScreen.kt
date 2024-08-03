@@ -1,6 +1,5 @@
 package com.sunway.csc2074.digidiary.screen
 
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,7 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -40,7 +41,6 @@ import com.maxkeppeler.sheets.clock.models.ClockSelection
 import com.sunway.csc2074.digidiary.model.DiaryEntry
 import com.sunway.csc2074.digidiary.viewmodel.DiaryEntryViewModel
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,6 +55,7 @@ fun UpdateScreen(entryId: Int, context: ComponentActivity, navController: NavCon
 
     val datePickerState = rememberUseCaseState()
     val timePickerState = rememberUseCaseState()
+    var openDeleteDialog by remember { mutableStateOf(false) }
 
     var titleInputText by remember { mutableStateOf("") }
     var descInputText by remember { mutableStateOf("") }
@@ -82,6 +83,13 @@ fun UpdateScreen(entryId: Int, context: ComponentActivity, navController: NavCon
                     }
                 },
                 title = { Text(text = "Update Diary Entry") },
+                actions = {
+                    IconButton(onClick = {
+                        openDeleteDialog = true
+                    }) {
+                        Icon(Icons.Default.Delete, "Delete diary entry")
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary
@@ -98,6 +106,25 @@ fun UpdateScreen(entryId: Int, context: ComponentActivity, navController: NavCon
             }
         }
     ) { padding ->
+        if (openDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { openDeleteDialog = false },
+                title = { Text(text = "Delete this entry?") },
+                text = { Text(text = "This action will permanently delete this diary entry") },
+                dismissButton = { Button(onClick = { openDeleteDialog = false }) { Text(text = "Cancel") }},
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            entry?.let {
+                                deleteData(navController, diaryEntryViewModel, it)
+                            }
+                            openDeleteDialog = false
+                        }
+                    ) {
+                        Text(text = "Delete")
+                    }
+                })
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -155,6 +182,11 @@ fun UpdateScreen(entryId: Int, context: ComponentActivity, navController: NavCon
             }
         }
     }
+}
+
+private fun deleteData(navController: NavController, diaryEntryViewModel: DiaryEntryViewModel, entry: DiaryEntry) {
+    diaryEntryViewModel.deleteEntry(entry)
+    navController.popBackStack()
 }
 
 private fun updateData(navController: NavController, diaryEntryViewModel: DiaryEntryViewModel, entryId: Int, title: String, description: String, date: String, time: String) {
