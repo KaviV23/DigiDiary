@@ -1,9 +1,12 @@
-package com.sunway.csc2074.digidiary.data
+package com.sunway.csc2074.digidiary.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
+import com.sunway.csc2074.digidiary.data.DiaryDatabase
+import com.sunway.csc2074.digidiary.repository.DiaryEntryRepository
+import com.sunway.csc2074.digidiary.model.DiaryEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

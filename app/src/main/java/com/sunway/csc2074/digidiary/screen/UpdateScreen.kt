@@ -1,6 +1,5 @@
 package com.sunway.csc2074.digidiary.screen
 
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,12 +35,11 @@ import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.clock.ClockDialog
 import com.maxkeppeler.sheets.clock.models.ClockConfig
 import com.maxkeppeler.sheets.clock.models.ClockSelection
-import com.sunway.csc2074.digidiary.model.DiaryEntry
 import com.sunway.csc2074.digidiary.viewmodel.DiaryEntryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddScreen(context: ComponentActivity, navController: NavController) {
+fun UpdateScreen(context: ComponentActivity, navController: NavController) {
     var selDate = ""
     var selTime = ""
 
@@ -75,7 +73,7 @@ fun AddScreen(context: ComponentActivity, navController: NavController) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    insertDataIntoDatabase(navController, diaryEntryViewModel, titleInputText, descInputText, selDate, selTime)
+                    /* TODO */
                 }
             ) {
                 Icon(Icons.Default.Done, contentDescription = "Save")
@@ -93,14 +91,14 @@ fun AddScreen(context: ComponentActivity, navController: NavController) {
             OutlinedTextField(
                 value = titleInputText,
                 onValueChange = { titleInputText = it },
-                label = {Text(text = "Enter Title")}
+                label = { Text(text = "Enter Title") }
             )
 
             // Description selector
             OutlinedTextField(
                 value = descInputText,
                 onValueChange = { descInputText = it },
-                label = {Text(text = "Enter Description")}
+                label = { Text(text = "Enter Description") }
             )
 
             // Date selector
@@ -140,26 +138,3 @@ fun AddScreen(context: ComponentActivity, navController: NavController) {
         }
     }
 }
-
-private fun insertDataIntoDatabase(navController: NavController, mDiaryEntryViewModel: DiaryEntryViewModel, title: String, description: String, date: String, time: String) {
-    if(inputCheck(title, description, date, time)) {
-        // Create diary entry object
-        val entry = DiaryEntry(0, title, description, "$date $time", "IMAGE")
-        mDiaryEntryViewModel.addEntry(entry)
-        Log.d("DATABASE", "Success")
-        navController.popBackStack()
-    } else {
-        Log.d("DATABASE", "Failure")
-    }
-
-}
-
-private fun inputCheck(title: String, description: String, date: String, time: String): Boolean {
-    return !(title.isBlank() || description.isBlank() || date.isBlank() || time.isBlank())
-}
-
-//@Composable
-//@Preview(showBackground = true)
-//fun AddScreenPreview() {
-//    AddScreen()
-//}

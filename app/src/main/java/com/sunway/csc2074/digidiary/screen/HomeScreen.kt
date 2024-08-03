@@ -31,8 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import com.sunway.csc2074.digidiary.R
-import com.sunway.csc2074.digidiary.data.DiaryEntry
-import com.sunway.csc2074.digidiary.data.DiaryEntryViewModel
+import com.sunway.csc2074.digidiary.model.DiaryEntry
+import com.sunway.csc2074.digidiary.viewmodel.DiaryEntryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

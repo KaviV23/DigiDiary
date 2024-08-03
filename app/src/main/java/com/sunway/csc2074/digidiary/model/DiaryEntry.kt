@@ -1,4 +1,4 @@
-package com.sunway.csc2074.digidiary.data
+package com.sunway.csc2074.digidiary.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
