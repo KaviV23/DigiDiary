@@ -3,6 +3,7 @@ package com.sunway.csc2074.digidiary.screen
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -31,8 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import com.sunway.csc2074.digidiary.R
-import com.sunway.csc2074.digidiary.data.DiaryEntry
-import com.sunway.csc2074.digidiary.data.DiaryEntryViewModel
+import com.sunway.csc2074.digidiary.model.DiaryEntry
+import com.sunway.csc2074.digidiary.viewmodel.DiaryEntryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,14 +68,14 @@ fun HomeScreen(context: ComponentActivity, navController: NavController) {
             contentPadding = PaddingValues(10.dp)
         ) {
             items(diaryEntries.size) { index ->
-                ListDiaryEntry(diaryEntries[index])
+                ListDiaryEntry(diaryEntries[index], navController)
             }
         }
     }
 }
 
 @Composable
-fun ListDiaryEntry(entry: DiaryEntry) {
+fun ListDiaryEntry(entry: DiaryEntry, navController: NavController) {
     val padding = 10.dp
     Row(
         modifier = Modifier
@@ -82,6 +83,9 @@ fun ListDiaryEntry(entry: DiaryEntry) {
             .fillMaxWidth()
             .clip(shape = RoundedCornerShape(10.dp))
             .background(MaterialTheme.colorScheme.primaryContainer)
+            .clickable {
+                navController.navigate(Screen.UpdateScreen.createRoute(entry.id))
+            }
     ) {
         Column(
             modifier = Modifier

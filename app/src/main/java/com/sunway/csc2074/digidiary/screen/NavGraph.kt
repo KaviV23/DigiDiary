@@ -1,16 +1,12 @@
 package com.sunway.csc2074.digidiary.screen
 
-import android.app.Application
-import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
-import com.sunway.csc2074.digidiary.data.DiaryEntry
-import com.sunway.csc2074.digidiary.data.DiaryEntryViewModel
+import androidx.navigation.navArgument
 
 @Composable
 fun SetupNavGraph(
@@ -30,6 +26,13 @@ fun SetupNavGraph(
             route = Screen.AddScreen.route
         ) {
             AddScreen(context, navController)
+        }
+        composable(
+            route = Screen.UpdateScreen.route,
+            arguments = listOf(navArgument("entryId") { type = NavType.IntType } )
+        ) { backStackEntry ->
+            val entryId = backStackEntry.arguments?.getInt("entryId") ?: return@composable
+            UpdateScreen(entryId, context, navController)
         }
     }
 }

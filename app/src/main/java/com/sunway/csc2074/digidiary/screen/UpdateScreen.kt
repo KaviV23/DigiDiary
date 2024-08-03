@@ -22,6 +22,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,10 +39,17 @@ import com.maxkeppeler.sheets.clock.models.ClockConfig
 import com.maxkeppeler.sheets.clock.models.ClockSelection
 import com.sunway.csc2074.digidiary.model.DiaryEntry
 import com.sunway.csc2074.digidiary.viewmodel.DiaryEntryViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddScreen(context: ComponentActivity, navController: NavController) {
+fun UpdateScreen(entryId: Int, context: ComponentActivity, navController: NavController) {
+
+    val diaryEntryViewModel: DiaryEntryViewModel = ViewModelProvider(context)[DiaryEntryViewModel::class.java]
+    val entry by diaryEntryViewModel.getEntryById(entryId).observeAsState()
+
     var selDate = ""
     var selTime = ""
 
@@ -50,10 +58,18 @@ fun AddScreen(context: ComponentActivity, navController: NavController) {
 
     var titleInputText by remember { mutableStateOf("") }
     var descInputText by remember { mutableStateOf("") }
-    var dateBtnText by remember { mutableStateOf("Select Date") }
-    var timeBtnText by remember { mutableStateOf("Select Time") }
+    var dateBtnText by remember { mutableStateOf("") }
+    var timeBtnText by remember { mutableStateOf("") }
 
-    val diaryEntryViewModel: DiaryEntryViewModel = ViewModelProvider(context)[DiaryEntryViewModel::class.java]
+    entry?.let {
+        selDate = DateTimeExtractor.extractDate(it.dateTime)
+        selTime = DateTimeExtractor.extractTime(it.dateTime)
+
+        titleInputText = it.title
+        descInputText = it.description
+        dateBtnText = DateTimeExtractor.extractDate(it.dateTime)
+        timeBtnText = DateTimeExtractor.extractTime(it.dateTime)
+    }
 
     Scaffold (
         topBar = {
@@ -75,10 +91,10 @@ fun AddScreen(context: ComponentActivity, navController: NavController) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    insertDataIntoDatabase(navController, diaryEntryViewModel, titleInputText, descInputText, selDate, selTime)
+                    updateData(navController, diaryEntryViewModel, entryId, titleInputText, descInputText, selDate, selTime)
                 }
             ) {
-                Icon(Icons.Default.Done, contentDescription = "Save")
+                Icon(Icons.Default.Done, contentDescription = "Update")
             }
         }
     ) { padding ->
@@ -93,14 +109,14 @@ fun AddScreen(context: ComponentActivity, navController: NavController) {
             OutlinedTextField(
                 value = titleInputText,
                 onValueChange = { titleInputText = it },
-                label = {Text(text = "Enter Title")}
+                label = { Text(text = "Update Title") }
             )
 
             // Description selector
             OutlinedTextField(
                 value = descInputText,
                 onValueChange = { descInputText = it },
-                label = {Text(text = "Enter Description")}
+                label = { Text(text = "Update Description") }
             )
 
             // Date selector
@@ -141,25 +157,33 @@ fun AddScreen(context: ComponentActivity, navController: NavController) {
     }
 }
 
-private fun insertDataIntoDatabase(navController: NavController, mDiaryEntryViewModel: DiaryEntryViewModel, title: String, description: String, date: String, time: String) {
-    if(inputCheck(title, description, date, time)) {
+private fun updateData(navController: NavController, diaryEntryViewModel: DiaryEntryViewModel, entryId: Int, title: String, description: String, date: String, time: String) {
+    if (inputCheck(title, description, date, time)) {
         // Create diary entry object
-        val entry = DiaryEntry(0, title, description, "$date $time", "IMAGE")
-        mDiaryEntryViewModel.addEntry(entry)
-        Log.d("DATABASE", "Success")
+        val updatedEntry = DiaryEntry(entryId, title, description, "$date $time", "IMAGE")
+        // Update current entry
+        diaryEntryViewModel.updateEntry(updatedEntry)
+        // Navigate back home
         navController.popBackStack()
-    } else {
-        Log.d("DATABASE", "Failure")
     }
-
 }
 
 private fun inputCheck(title: String, description: String, date: String, time: String): Boolean {
     return !(title.isBlank() || description.isBlank() || date.isBlank() || time.isBlank())
 }
 
-//@Composable
-//@Preview(showBackground = true)
-//fun AddScreenPreview() {
-//    AddScreen()
-//}
+private object DateTimeExtractor {
+    private val dateTimeFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+    fun extractDate(dateTime: String): String {
+        val date = dateTimeFormat.parse(dateTime)
+        return dateFormat.format(date!!)
+    }
+
+    fun extractTime(dateTime: String): String {
+        val date = dateTimeFormat.parse(dateTime)
+        return timeFormat.format(date!!)
+    }
+}
