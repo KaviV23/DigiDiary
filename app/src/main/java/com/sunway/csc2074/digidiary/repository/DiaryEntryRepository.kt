@@ -8,7 +8,15 @@ class DiaryEntryRepository(private val diaryEntryDao: DiaryEntryDao) {
 
     val readALlData: LiveData<List<DiaryEntry>> = diaryEntryDao.readAllData()
 
+    fun getEntryById(entryId: Int): LiveData<DiaryEntry> {
+        return diaryEntryDao.getEntryById(entryId)
+    }
+
     suspend fun addEntry(entry: DiaryEntry) {
         diaryEntryDao.addEntry(entry)
+    }
+
+    suspend fun updateEntry(entry: DiaryEntry) {
+        diaryEntryDao.updateEntry(entry)
     }
 }

@@ -21,11 +21,19 @@ class DiaryEntryViewModel(application: Application): AndroidViewModel(applicatio
         readAllData = repository.readALlData
     }
 
+    fun getEntryById(entryId: Int): LiveData<DiaryEntry> {
+        return repository.getEntryById(entryId)
+    }
+
     fun addEntry(entry: DiaryEntry) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.addEntry(entry)
         }
     }
 
-
+    fun updateEntry(entry: DiaryEntry) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.updateEntry(entry)
+        }
+    }
 }
