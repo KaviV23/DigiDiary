@@ -2,7 +2,6 @@ package com.sunway.csc2074.digidiary.screen
 
 import android.content.Context
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,7 +30,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavController
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
@@ -47,9 +48,10 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UpdateScreen(entryId: Int, context: ComponentActivity, navController: NavController) {
+fun UpdateScreen(entryId: Int, navController: NavController) {
+    val context = LocalContext.current
 
-    val diaryEntryViewModel: DiaryEntryViewModel = ViewModelProvider(context)[DiaryEntryViewModel::class.java]
+    val diaryEntryViewModel: DiaryEntryViewModel = ViewModelProvider(context as ViewModelStoreOwner)[DiaryEntryViewModel::class.java]
     val entry by diaryEntryViewModel.getEntryById(entryId).observeAsState()
 
     var selDate = ""
@@ -209,9 +211,9 @@ private fun inputCheck(title: String, description: String, date: String, time: S
 }
 
 private object DateTimeExtractor {
-    private val dateTimeFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+    private var dateTimeFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+    private var dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    private var timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 
     fun extractDate(dateTime: String): String {
         val date = dateTimeFormat.parse(dateTime)

@@ -1,13 +1,14 @@
 package com.sunway.csc2074.digidiary.screen
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
-import androidx.activity.ComponentActivity
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
@@ -29,8 +30,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -38,12 +46,15 @@ import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.clock.ClockDialog
 import com.maxkeppeler.sheets.clock.models.ClockConfig
 import com.maxkeppeler.sheets.clock.models.ClockSelection
+import com.sunway.csc2074.digidiary.R
 import com.sunway.csc2074.digidiary.model.DiaryEntry
 import com.sunway.csc2074.digidiary.viewmodel.DiaryEntryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddScreen(context: ComponentActivity, navController: NavController) {
+fun AddScreen(navController: NavController) {
+    val context = LocalContext.current
+
     var selDate = ""
     var selTime = ""
 
@@ -55,7 +66,7 @@ fun AddScreen(context: ComponentActivity, navController: NavController) {
     var dateBtnText by remember { mutableStateOf("Select Date") }
     var timeBtnText by remember { mutableStateOf("Select Time") }
 
-    val diaryEntryViewModel: DiaryEntryViewModel = ViewModelProvider(context)[DiaryEntryViewModel::class.java]
+    val diaryEntryViewModel: DiaryEntryViewModel = ViewModelProvider(context as ViewModelStoreOwner)[DiaryEntryViewModel::class.java]
 
     Scaffold (
         topBar = {
