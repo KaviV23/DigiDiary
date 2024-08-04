@@ -1,5 +1,7 @@
 package com.sunway.csc2074.digidiary.screen
 
+import android.content.Context
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -99,7 +101,7 @@ fun UpdateScreen(entryId: Int, context: ComponentActivity, navController: NavCon
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    updateData(navController, diaryEntryViewModel, entryId, titleInputText, descInputText, selDate, selTime)
+                    updateData(context, navController, diaryEntryViewModel, entryId, titleInputText, descInputText, selDate, selTime)
                 }
             ) {
                 Icon(Icons.Default.Done, contentDescription = "Update")
@@ -189,7 +191,7 @@ private fun deleteData(navController: NavController, diaryEntryViewModel: DiaryE
     navController.popBackStack()
 }
 
-private fun updateData(navController: NavController, diaryEntryViewModel: DiaryEntryViewModel, entryId: Int, title: String, description: String, date: String, time: String) {
+private fun updateData(context: Context, navController: NavController, diaryEntryViewModel: DiaryEntryViewModel, entryId: Int, title: String, description: String, date: String, time: String) {
     if (inputCheck(title, description, date, time)) {
         // Create diary entry object
         val updatedEntry = DiaryEntry(entryId, title, description, "$date $time", "IMAGE")
@@ -197,6 +199,8 @@ private fun updateData(navController: NavController, diaryEntryViewModel: DiaryE
         diaryEntryViewModel.updateEntry(updatedEntry)
         // Navigate back home
         navController.popBackStack()
+    } else {
+        Toast.makeText(context, "Please provide all the information", Toast.LENGTH_SHORT).show()
     }
 }
 

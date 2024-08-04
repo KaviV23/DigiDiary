@@ -1,6 +1,8 @@
 package com.sunway.csc2074.digidiary.screen
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -75,7 +77,7 @@ fun AddScreen(context: ComponentActivity, navController: NavController) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    insertDataIntoDatabase(navController, diaryEntryViewModel, titleInputText, descInputText, selDate, selTime)
+                    insertDataIntoDatabase(context, navController, diaryEntryViewModel, titleInputText, descInputText, selDate, selTime)
                 }
             ) {
                 Icon(Icons.Default.Done, contentDescription = "Save")
@@ -141,15 +143,14 @@ fun AddScreen(context: ComponentActivity, navController: NavController) {
     }
 }
 
-private fun insertDataIntoDatabase(navController: NavController, mDiaryEntryViewModel: DiaryEntryViewModel, title: String, description: String, date: String, time: String) {
+private fun insertDataIntoDatabase(context : Context, navController: NavController, mDiaryEntryViewModel: DiaryEntryViewModel, title: String, description: String, date: String, time: String) {
     if(inputCheck(title, description, date, time)) {
         // Create diary entry object
         val entry = DiaryEntry(0, title, description, "$date $time", "IMAGE")
         mDiaryEntryViewModel.addEntry(entry)
-        Log.d("DATABASE", "Success")
         navController.popBackStack()
     } else {
-        Log.d("DATABASE", "Failure")
+        Toast.makeText(context, "Please provide all the information", Toast.LENGTH_SHORT).show()
     }
 
 }
