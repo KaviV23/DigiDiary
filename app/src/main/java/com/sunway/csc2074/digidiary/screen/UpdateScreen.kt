@@ -1,6 +1,8 @@
 package com.sunway.csc2074.digidiary.screen
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.icu.text.DateFormat.getTimeInstance
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -219,7 +221,7 @@ fun UpdateScreen(entryId: Int, navController: NavController) {
                     is24HourFormat = true,
                 ),
                 selection = ClockSelection.HoursMinutes { hours, minutes ->
-                    selTime = "$hours:$minutes"
+                    selTime = String.format(Locale.getDefault(), "%02d:%02d", hours, minutes)
                     timeBtnText = "Time: $selTime"
                 }
             )

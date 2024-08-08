@@ -52,6 +52,7 @@ import com.sunway.csc2074.digidiary.model.DiaryEntry
 import com.sunway.csc2074.digidiary.viewmodel.DiaryEntryViewModel
 import java.io.File
 import java.io.FileOutputStream
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -174,7 +175,7 @@ fun AddScreen(navController: NavController) {
                     is24HourFormat = true,
                 ),
                 selection = ClockSelection.HoursMinutes { hours, minutes ->
-                    selTime = "$hours:$minutes"
+                    selTime = String.format(Locale.getDefault(), "%02d:%02d", hours, minutes)
                     timeBtnText = "Time: $selTime"
                 }
             )
