@@ -95,4 +95,8 @@ dependencies {
     implementation("com.maxkeppeler.sheets-compose-dialogs:calendar:$material3_dialogs")
     // Material 3 CLOCK date picker
     implementation("com.maxkeppeler.sheets-compose-dialogs:clock:$material3_dialogs")
+
+    // Coil
+    implementation("io.coil-kt:coil:2.7.0")
+    implementation("io.coil-kt:coil-compose:2.7.0")
 }
