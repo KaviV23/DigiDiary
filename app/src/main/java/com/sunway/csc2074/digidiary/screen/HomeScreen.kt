@@ -1,6 +1,7 @@
 package com.sunway.csc2074.digidiary.screen
 
-import androidx.compose.foundation.Image
+import android.content.Context
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -26,15 +28,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavController
-import com.sunway.csc2074.digidiary.R
+import coil.compose.AsyncImage
 import com.sunway.csc2074.digidiary.model.DiaryEntry
 import com.sunway.csc2074.digidiary.viewmodel.DiaryEntryViewModel
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,7 +52,7 @@ fun HomeScreen(navController: NavController) {
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text(text = "DigiDiary")},
+                title = { Text(text = "DigiDiary", fontWeight = FontWeight.Bold)},
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary
@@ -70,14 +74,14 @@ fun HomeScreen(navController: NavController) {
             contentPadding = PaddingValues(10.dp)
         ) {
             items(diaryEntries.size) { index ->
-                ListDiaryEntry(diaryEntries[index], navController)
+                ListDiaryEntry(context, diaryEntries[index], navController)
             }
         }
     }
 }
 
 @Composable
-fun ListDiaryEntry(entry: DiaryEntry, navController: NavController) {
+fun ListDiaryEntry(context: Context, entry: DiaryEntry, navController: NavController) {
     val padding = 10.dp
     Row(
         modifier = Modifier
@@ -100,6 +104,11 @@ fun ListDiaryEntry(entry: DiaryEntry, navController: NavController) {
                 style = MaterialTheme.typography.titleLarge
             )
             Text(
+                text = entry.description,
+                color = MaterialTheme.colorScheme.secondary,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
                 text = entry.dateTime,
                 color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.bodySmall
@@ -108,16 +117,14 @@ fun ListDiaryEntry(entry: DiaryEntry, navController: NavController) {
         Column(
             modifier = Modifier.padding(padding)
         ) {
-            Image(painter = painterResource(id = R.drawable.ic_launcher_foreground), contentDescription ="Diary image")
+            AsyncImage(
+                model = Uri.fromFile(File("${context.filesDir}" + File.separator + entry.imageUri)),
+                contentDescription = "Diary image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .clip(shape = RoundedCornerShape(10.dp))
+                    .size(125.dp)
+            )
         }
     }
 }
-
-//@Composable
-//@Preview(showBackground = true)
-//fun HomeScreenPreview() {
-//    HomeScreen(navController = rememberNavController(), diaryEntries = mutableListOf(
-//        DiaryEntry(0,"poo","poo", "TIME"),
-//        DiaryEntry(0,"poo","poo", "TIME")
-//    ))
-//}

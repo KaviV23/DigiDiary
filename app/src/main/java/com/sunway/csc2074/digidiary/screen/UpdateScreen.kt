@@ -1,11 +1,16 @@
 package com.sunway.csc2074.digidiary.screen
 
 import android.content.Context
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -30,10 +35,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -43,6 +53,8 @@ import com.maxkeppeler.sheets.clock.models.ClockConfig
 import com.maxkeppeler.sheets.clock.models.ClockSelection
 import com.sunway.csc2074.digidiary.model.DiaryEntry
 import com.sunway.csc2074.digidiary.viewmodel.DiaryEntryViewModel
+import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -66,6 +78,14 @@ fun UpdateScreen(entryId: Int, navController: NavController) {
     var dateBtnText by remember { mutableStateOf("") }
     var timeBtnText by remember { mutableStateOf("") }
 
+    var currentImage by remember { mutableStateOf<File?>(null)}
+    var newImageUri by remember { mutableStateOf<Uri?>(null)}
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            newImageUri = uri
+        })
+
     entry?.let {
         selDate = DateTimeExtractor.extractDate(it.dateTime)
         selTime = DateTimeExtractor.extractTime(it.dateTime)
@@ -74,6 +94,9 @@ fun UpdateScreen(entryId: Int, navController: NavController) {
         descInputText = it.description
         dateBtnText = DateTimeExtractor.extractDate(it.dateTime)
         timeBtnText = DateTimeExtractor.extractTime(it.dateTime)
+
+        currentImage = File(context.filesDir, it.imageUri)
+        newImageUri = Uri.fromFile(currentImage)
     }
 
     Scaffold (
@@ -86,7 +109,7 @@ fun UpdateScreen(entryId: Int, navController: NavController) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back to home screen")
                     }
                 },
-                title = { Text(text = "Update Diary Entry") },
+                title = { Text(text = "Update Diary Entry", fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = {
                         openDeleteDialog = true
@@ -103,7 +126,11 @@ fun UpdateScreen(entryId: Int, navController: NavController) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    updateData(context, navController, diaryEntryViewModel, entryId, titleInputText, descInputText, selDate, selTime)
+                    if (newImageUri != null && currentImage != null) {
+                        updateData(context, navController, diaryEntryViewModel, entryId, titleInputText, descInputText, selDate, selTime, newImageUri!!, currentImage!!)
+                    } else {
+                        Toast.makeText(context, "Select an image first", Toast.LENGTH_SHORT).show()
+                    }
                 }
             ) {
                 Icon(Icons.Default.Done, contentDescription = "Update")
@@ -136,6 +163,23 @@ fun UpdateScreen(entryId: Int, navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            // Selected image
+            if (newImageUri != null) {
+                AsyncImage(
+                    model = newImageUri,
+                    contentDescription = "Selected image",
+                    modifier = Modifier
+                        .clip(shape = RoundedCornerShape(10.dp))
+                        .size(250.dp)
+                )
+            }
+            // Select image button
+            Button(onClick = {
+                imagePicker.launch("image/*")
+            }) {
+                Text(text = "Select image")
+            }
+
             // Title selector
             OutlinedTextField(
                 value = titleInputText,
@@ -193,21 +237,34 @@ private fun deleteData(navController: NavController, diaryEntryViewModel: DiaryE
     navController.popBackStack()
 }
 
-private fun updateData(context: Context, navController: NavController, diaryEntryViewModel: DiaryEntryViewModel, entryId: Int, title: String, description: String, date: String, time: String) {
-    if (inputCheck(title, description, date, time)) {
-        // Create diary entry object
-        val updatedEntry = DiaryEntry(entryId, title, description, "$date $time", "IMAGE")
-        // Update current entry
+private fun updateData(context: Context, navController: NavController, diaryEntryViewModel: DiaryEntryViewModel, entryId: Int, title: String, description: String, date: String, time: String, newImageUri: Uri, oldImage: File) {
+    if (inputCheck(title, description, date, time, newImageUri)) {
+        val savedImageUri = saveImage(context, newImageUri)
+        oldImage.delete()
+        val updatedEntry = DiaryEntry(entryId, title, description, "$date $time", savedImageUri)
         diaryEntryViewModel.updateEntry(updatedEntry)
-        // Navigate back home
         navController.popBackStack()
     } else {
         Toast.makeText(context, "Please provide all the information", Toast.LENGTH_SHORT).show()
     }
 }
 
-private fun inputCheck(title: String, description: String, date: String, time: String): Boolean {
-    return !(title.isBlank() || description.isBlank() || date.isBlank() || time.isBlank())
+private fun saveImage(context: Context, uri: Uri): String {
+    val inputStream = context.contentResolver.openInputStream(uri)
+    var fileName = ""
+    inputStream?.let {
+        fileName = "${System.currentTimeMillis()}.jpg"
+        val file = File(context.filesDir, fileName)
+        val outputStream = FileOutputStream(file)
+        inputStream.copyTo(outputStream)
+        outputStream.close()
+        inputStream.close()
+    }
+    return fileName
+}
+
+private fun inputCheck(title: String, description: String, date: String, time: String, uri: Uri): Boolean {
+    return !(title.isBlank() || description.isBlank() || date.isBlank() || time.isBlank() || uri == null)
 }
 
 private object DateTimeExtractor {

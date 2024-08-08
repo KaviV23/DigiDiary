@@ -1,14 +1,16 @@
 package com.sunway.csc2074.digidiary.screen
 
 import android.content.Context
+import android.net.Uri
 import android.widget.Toast
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
@@ -30,15 +32,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -46,9 +48,10 @@ import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.clock.ClockDialog
 import com.maxkeppeler.sheets.clock.models.ClockConfig
 import com.maxkeppeler.sheets.clock.models.ClockSelection
-import com.sunway.csc2074.digidiary.R
 import com.sunway.csc2074.digidiary.model.DiaryEntry
 import com.sunway.csc2074.digidiary.viewmodel.DiaryEntryViewModel
+import java.io.File
+import java.io.FileOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,6 +69,13 @@ fun AddScreen(navController: NavController) {
     var dateBtnText by remember { mutableStateOf("Select Date") }
     var timeBtnText by remember { mutableStateOf("Select Time") }
 
+    var imageUri by remember { mutableStateOf<Uri?>(null)}
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            imageUri = uri
+        })
+
     val diaryEntryViewModel: DiaryEntryViewModel = ViewModelProvider(context as ViewModelStoreOwner)[DiaryEntryViewModel::class.java]
 
     Scaffold (
@@ -78,7 +88,7 @@ fun AddScreen(navController: NavController) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back to home screen")
                     }
                 },
-                title = { Text(text = "Add Diary Entry") },
+                title = { Text(text = "Add Diary Entry", fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary
@@ -88,7 +98,13 @@ fun AddScreen(navController: NavController) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    insertDataIntoDatabase(context, navController, diaryEntryViewModel, titleInputText, descInputText, selDate, selTime)
+                    if (imageUri != null) {
+                        imageUri?.let {
+                            insertDataIntoDatabase(context, navController, diaryEntryViewModel, titleInputText, descInputText, selDate, selTime, it)
+                        }
+                    } else {
+                        Toast.makeText(context, "Select an image first", Toast.LENGTH_SHORT).show()
+                    }
                 }
             ) {
                 Icon(Icons.Default.Done, contentDescription = "Save")
@@ -102,6 +118,23 @@ fun AddScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            // Selected image
+            if (imageUri != null) {
+                AsyncImage(
+                    model = imageUri,
+                    contentDescription = "Selected image",
+                    modifier = Modifier
+                        .clip(shape = RoundedCornerShape(10.dp))
+                        .size(250.dp)
+                )
+            }
+            // Select image button
+            Button(onClick = {
+                imagePicker.launch("image/*")
+            }) {
+                Text(text = "Select image")
+            }
+
             // Title selector
             OutlinedTextField(
                 value = titleInputText,
@@ -154,10 +187,10 @@ fun AddScreen(navController: NavController) {
     }
 }
 
-private fun insertDataIntoDatabase(context : Context, navController: NavController, mDiaryEntryViewModel: DiaryEntryViewModel, title: String, description: String, date: String, time: String) {
-    if(inputCheck(title, description, date, time)) {
-        // Create diary entry object
-        val entry = DiaryEntry(0, title, description, "$date $time", "IMAGE")
+private fun insertDataIntoDatabase(context : Context, navController: NavController, mDiaryEntryViewModel: DiaryEntryViewModel, title: String, description: String, date: String, time: String, uri: Uri) {
+    if(inputCheck(title, description, date, time, uri)) {
+        val savedImageUri = saveImage(context, uri)
+        val entry = DiaryEntry(0, title, description, "$date $time", savedImageUri)
         mDiaryEntryViewModel.addEntry(entry)
         navController.popBackStack()
     } else {
@@ -166,12 +199,20 @@ private fun insertDataIntoDatabase(context : Context, navController: NavControll
 
 }
 
-private fun inputCheck(title: String, description: String, date: String, time: String): Boolean {
-    return !(title.isBlank() || description.isBlank() || date.isBlank() || time.isBlank())
+private fun saveImage(context: Context, uri: Uri): String {
+    val inputStream = context.contentResolver.openInputStream(uri)
+    var fileName = ""
+    inputStream?.let {
+        fileName = "${System.currentTimeMillis()}.jpg"
+        val file = File(context.filesDir, fileName)
+        val outputStream = FileOutputStream(file)
+        inputStream.copyTo(outputStream)
+        outputStream.close()
+        inputStream.close()
+    }
+    return fileName
 }
 
-//@Composable
-//@Preview(showBackground = true)
-//fun AddScreenPreview() {
-//    AddScreen()
-//}
+private fun inputCheck(title: String, description: String, date: String, time: String, uri: Uri): Boolean {
+    return !(title.isBlank() || description.isBlank() || date.isBlank() || time.isBlank() || uri == null)
+}
